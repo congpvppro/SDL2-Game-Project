@@ -16,13 +16,8 @@
 
 const double pi = 3.1415926535897;
 const int gravity = 1;
-
-
-
-
-
 Platform platforms[10] = { {0}, {1}, {2}, {3}, {4}, {5},{6},{7},{8},{9} };
-Player player(platforms[0].getX() + platforms[0].getWidth() / 2 - 26 / 2, platforms[0].getY() - player.getHeight(), 26, 32);
+Player player(platforms[0].getX() + platforms[0].getWidth() / 2 + 32 / 2, platforms[0].getY() - player.getHeight(), 32, 32);
 
 int LoadHighScore() {
     return 32;
@@ -158,6 +153,7 @@ int main(int argc, char** argv) {
 
     double lavaY = screenHeight - 32;
     double timer = 0;
+    int timer1 = 0;
     double splashTimer = 0;
 
     bool firstTime = true;
@@ -170,7 +166,7 @@ int main(int argc, char** argv) {
     TTF_Init();
 
     window = SDL_CreateWindow(
-        "Terri-Fried",
+        "SunnyLand",
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         screenWidth, screenHeight,
         SDL_WINDOW_OPENGL
@@ -178,19 +174,19 @@ int main(int argc, char** argv) {
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
 
-    SDL_Surface* egg = IMG_Load("resources/egg1.png");
-    SDL_SetWindowIcon(window, egg);
+    SDL_Surface* icon = IMG_Load("resources/icon.png");
+    SDL_SetWindowIcon(window, icon);
 
     Mix_OpenAudio(22050, AUDIO_S16SYS, 2, 4096);    
     // SetMasterVolume(0.3f);
-    Animation idle;
+    Animation idle, running,fall,ready;
 
     SDL_Surface* playerSprite_surf = IMG_Load("resources/egg1.png");
     SDL_Surface* lavaSprite_surf = IMG_Load("resources/lava.png");
     SDL_Surface* platformSprite_surf = IMG_Load("resources/platform.png");
     SDL_Surface* coinSprite_surf = IMG_Load("resources/coin.png");
     SDL_Surface* scoreBoxSprite_surf = IMG_Load("resources/scorebox.png");
-    SDL_Surface* logo_surf = IMG_Load("resources/egg1.png");
+    SDL_Surface* logo_surf = IMG_Load("resources/title.png");
     SDL_Surface* splashEggSprite_surf = IMG_Load("resources/splash_egg.png");
 
     SDL_Texture* charactertex = IMG_LoadTexture(renderer, "resources/player.png");
@@ -209,31 +205,46 @@ int main(int argc, char** argv) {
     Mix_Chunk* fxSplash = Mix_LoadWAV("resources/splash.wav");
     Mix_Chunk* fxSelect = Mix_LoadWAV("resources/select.wav");
 
-    idle.init(charactertex, PLAYER_FRAMES, PLAYER_CLIPS);
+    idle.init(charactertex, IDLE_FRAMES, IDLE_CLIPS);
+    running.init(charactertex, RUNNING_FRAMES, RUNNING_CLIPS);
+    fall.init(charactertex, FALL_FRAMES, FALL_CLIPS);
+    ready.init(charactertex, READY_FRAMES, READY_CLIPS);
 
     bool quit = false;
 
     bool mouse_down = false;
 
-    int mouse_x, mouse_y;
+    bool a_pressed = false, d_pressed = false;
 
+    SDL_RendererFlip flip = SDL_FLIP_NONE;
+
+    int mouse_x, mouse_y;
+   
     while (!quit) {
         SDL_Event e;
         bool mouse_released = false;
         bool mouse_pressed = false;
-        if ((SDL_GetTicks() / 150) % 4 == 0){
+        
+        if (timer1 % 5 == 0){
             idle.tick();
-     }
+            running.tick();
+            fall.tick();
+            ready.tick();
+        }
+        
+        
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_KEYDOWN)
             {
                 switch (e.key.keysym.sym) {
                 case SDLK_a:
                     player.setVelocity(-3, 0);
-                    
+                    a_pressed = true;
+                    flip = SDL_FLIP_HORIZONTAL;
                     break;
                 case SDLK_d:
                     player.setVelocity(3, 0);
+                    d_pressed = true;
                     break;
                 }
             }
@@ -243,11 +254,12 @@ int main(int argc, char** argv) {
                 {
                 case SDLK_a:
                     player.setVelocity(0, 0);
-                   
+                    a_pressed = false;
+                    flip = SDL_FLIP_NONE;
                     break;
                 case SDLK_d:
                     player.setVelocity(0, 0);
-                   
+                    d_pressed = false;
                     break;
                 }
             }
@@ -364,6 +376,7 @@ int main(int argc, char** argv) {
 
             lavaY = screenHeight - 43 - sin(timer) * 5;
             timer += 0.05;
+            timer1 += 1;
 
             SDL_SetRenderDrawColor(renderer, 238, 228, 225, 255);
             SDL_RenderClear(renderer);
@@ -380,7 +393,7 @@ int main(int argc, char** argv) {
             }
 
             //DrawRectangle(player.getX(), player.getY(), player.getWidth(), player.getHeight(), WHITE);
-
+            double distance = (double)mouse_x - player.getX();
             for (int i = 0; i < 10; i++) {
                 SDL_Rect platformSprite_rect = { (int)platforms[i].getX(),(int)platforms[i].getY(), 100, 32 };
                 SDL_RenderCopy(renderer, platformSprite, NULL, &platformSprite_rect);
@@ -390,10 +403,39 @@ int main(int argc, char** argv) {
                     SDL_RenderCopy(renderer, coinSprite, NULL, &coinSprite_rect);
                 }
             }
-            std::cout << timer << " " << SDL_GetTicks() << std::endl;
-            const SDL_Rect* clip = idle.getCurrentClip();
-            SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY()- clip->h, clip->w *2, clip->h *2};
-            SDL_RenderCopy(renderer, idle.texture, clip , &renderQuad);
+            if (!a_pressed && !d_pressed && player.getVelocity().y == 0 && !mouse_down)
+            {
+                const SDL_Rect* clip = idle.getCurrentClip();
+                SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY() - clip->h, clip->w * 2, clip->h * 2 };
+                SDL_RenderCopy(renderer, idle.texture, clip, &renderQuad);
+            }
+            else if( (a_pressed || d_pressed) &&player.getVelocity().y == 0)
+            {
+                const SDL_Rect* clip = running.getCurrentClip();
+                SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY() - clip->h, clip->w * 2, clip->h * 2 };
+                SDL_RenderCopyEx(renderer, running.texture, clip, &renderQuad,NULL,NULL, flip);
+            }
+            else if (player.getVelocity().y != 0)
+            {
+                const SDL_Rect* clip = fall.getCurrentClip();
+                SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY() - clip->h, clip->w * 2, clip->h * 2 };
+                SDL_RenderCopy(renderer, fall.texture, clip, &renderQuad);
+            }
+            else if (mouse_down)
+            {
+                if (distance < 0) {
+                    const SDL_Rect* clip = ready.getCurrentClip();
+                    SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY() - clip->h, clip->w * 2, clip->h * 2 };
+                    SDL_RenderCopyEx(renderer, ready.texture, clip, &renderQuad,NULL,NULL, SDL_FLIP_HORIZONTAL);
+                }
+                else
+                {
+                    const SDL_Rect* clip = ready.getCurrentClip();
+                    SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY() - clip->h, clip->w * 2, clip->h * 2 };
+                    SDL_RenderCopy(renderer, ready.texture, clip, &renderQuad);
+                }
+
+            }
 
             SDL_Rect lavaSprite_rect = { 0, (int)lavaY, 1400, 48 };
             SDL_RenderCopy(renderer, lavaSprite, NULL, &lavaSprite_rect);

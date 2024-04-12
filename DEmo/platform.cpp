@@ -1,9 +1,7 @@
 #include "platform.h"
 #include <cmath>
 
-const int screenWidth = 1400;
-const int screenHeight = 800;
-
+int screenHeight = 800;
 Platform::Platform(int index) {
     width = 100;
     height = 32;

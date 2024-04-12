@@ -1,5 +1,4 @@
 #include "player.h"
-
 #include <math.h>
 #include <vector>
 
