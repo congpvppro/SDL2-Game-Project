@@ -216,6 +216,10 @@ int main(int argc, char** argv) {
 
     bool a_pressed = false, d_pressed = false;
 
+    bool freefall = false;
+
+    bool pause = false;
+
     SDL_RendererFlip flip = SDL_FLIP_NONE;
 
     int mouse_x, mouse_y;
@@ -233,54 +237,57 @@ int main(int argc, char** argv) {
         }
         
         
-        while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_KEYDOWN)
-            {
-                switch (e.key.keysym.sym) {
-                case SDLK_a:
-                    player.setVelocity(-3, 0);
-                    a_pressed = true;
-                    flip = SDL_FLIP_HORIZONTAL;
-                    break;
-                case SDLK_d:
-                    player.setVelocity(3, 0);
-                    d_pressed = true;
-                    break;
-                }
-            }
-            else  if (e.type == SDL_KEYUP)
-            {
-                switch (e.key.keysym.sym)
+            while (SDL_PollEvent(&e) && !freefall) {
+                if (e.type == SDL_KEYDOWN)
                 {
-                case SDLK_a:
-                    player.setVelocity(0, 0);
-                    a_pressed = false;
-                    flip = SDL_FLIP_NONE;
-                    break;
-                case SDLK_d:
-                    player.setVelocity(0, 0);
-                    d_pressed = false;
-                    break;
+                    switch (e.key.keysym.sym) {
+                    case SDLK_a:
+                        player.setVelocity(-3, 0);
+                        a_pressed = true;
+                        flip = SDL_FLIP_HORIZONTAL;
+                        break;
+                    case SDLK_d:
+                        player.setVelocity(3, 0);
+                        d_pressed = true;
+                        break;
+                    case SDLK_ESCAPE:
+                        pause = true;
+                    }
                 }
-            }
-            else {
-                switch (e.type) {
-                case SDL_QUIT: {
-                    quit = true;
-                } break;
+                else  if (e.type == SDL_KEYUP)
+                {
+                    switch (e.key.keysym.sym)
+                    {
+                    case SDLK_a:
+                        player.setVelocity(0, 0);
+                        a_pressed = false;
+                        flip = SDL_FLIP_NONE;
+                        break;
+                    case SDLK_d:
+                        player.setVelocity(0, 0);
+                        d_pressed = false;
+                        break;
+                    }
+                }
+                else {
+                    switch (e.type) {
+                    case SDL_QUIT: {
+                        quit = true;
+                    } break;
 
-                case SDL_MOUSEBUTTONDOWN: {
-                    mouse_down = true;
-                    mouse_pressed = true;
-                    
-                } break;
-                case SDL_MOUSEBUTTONUP: {
-                    mouse_down = false;
-                    mouse_released = true;
-                   
-                } break;
+                    case SDL_MOUSEBUTTONDOWN: {
+                        mouse_down = true;
+                        mouse_pressed = true;
+
+                    } break;
+                    case SDL_MOUSEBUTTONUP: {
+                        mouse_down = false;
+                        mouse_released = true;
+
+                    } break;
+                    }
                 }
-            }
+            
         }
 
         SDL_PumpEvents();
@@ -300,7 +307,7 @@ int main(int argc, char** argv) {
                 SDL_SetRenderDrawColor(renderer, 238, 228, 225, 255);
                 SDL_RenderClear(renderer);
 
-                SDL_Rect logo_rect = { screenWidth / 2 - 200, screenHeight / 2 - 45 - 30, 400, 90 };
+                SDL_Rect logo_rect = { screenWidth / 2 - 400, screenHeight / 2 - 285 - 30, 800, 570 };
                 SDL_RenderCopy(renderer, logo, NULL, &logo_rect);
 
                 Draw_Font(renderer, highscore, screenWidth / 2 - 37, screenHeight / 2 + 10, 74, 32, 32, { 0, 0, 0 });
@@ -335,118 +342,129 @@ int main(int argc, char** argv) {
             }
         }
         else {
-            if (playCoinFX) {
-                Mix_PlayChannel(-1, fxCoin, 0);
-                playCoinFX = false;
-            }
-
-            if (mouse_pressed && player.isOnGround()) {
-                Mix_PlayChannel(-1, fxClick, 0);
-                mouseDownX = mouse_x;
-                mouseDownY = mouse_y;
-            }
-
-            if (mouse_released && player.isOnGround()) {
-                if (firstTime) {
-                    firstTime = false;
+            if (!pause) {
+                if (playCoinFX) {
+                    Mix_PlayChannel(-1, fxCoin, 0);
+                    playCoinFX = false;
                 }
-                else {
-                    Mix_PlayChannel(-1, fxLaunch, 0);
-
-                    if (player.isOnPlatform())
-                        player.setY((int)player.getY() - 1);
-
-                    int velocityX = mouse_x - mouseDownX;
-                    int velocityY = mouse_y - mouseDownY;
-
-                    player.setVelocity((double)velocityX * .08, (double)velocityY * .08);
-                }
-            }
-
-            checkPlayerCollision();
-            player.updatePosition();
-
-            if (player.getY() > screenHeight) {
-                Mix_PlayChannel(-1, fxDeath, 0);
-                resetGame();
-            }
-            for (int i = 0; i < 10; i++) {
-                platforms[i].updatePosition();
-            }
-
-            lavaY = screenHeight - 43 - sin(timer) * 5;
-            timer += 0.05;
-            timer1 += 1;
-
-            SDL_SetRenderDrawColor(renderer, 238, 228, 225, 255);
-            SDL_RenderClear(renderer);
-
-            if (mouse_down && player.isOnGround()) {
-                SDL_SetRenderDrawColor(renderer, 178, 150, 125, 255);
-                SDL_RenderDrawLine(
-                    renderer,
-                    mouseDownX + (int)(player.getX() - mouseDownX) + (int)(player.getWidth() / 2),
-                    mouseDownY + (int)(player.getY() - mouseDownY) + (int)(player.getHeight() / 2),
-                    mouse_x + (int)(player.getX() - mouseDownX) + (int)(player.getWidth() / 2),
-                    mouse_y + (int)(player.getY() - mouseDownY) + (int)(player.getHeight() / 2)
-                );
-            }
-
-            //DrawRectangle(player.getX(), player.getY(), player.getWidth(), player.getHeight(), WHITE);
-            double distance = (double)mouse_x - player.getX();
-            for (int i = 0; i < 10; i++) {
-                SDL_Rect platformSprite_rect = { (int)platforms[i].getX(),(int)platforms[i].getY(), 100, 32 };
-                SDL_RenderCopy(renderer, platformSprite, NULL, &platformSprite_rect);
-
-                if (platforms[i].getHasCoin()) {
-                    SDL_Rect coinSprite_rect = { platforms[i].getCoinX(), platforms[i].getCoinY(), 24, 24 };
-                    SDL_RenderCopy(renderer, coinSprite, NULL, &coinSprite_rect);
-                }
-            }
-            if (!a_pressed && !d_pressed && player.getVelocity().y == 0 && !mouse_down)
-            {
-                const SDL_Rect* clip = idle.getCurrentClip();
-                SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY() - clip->h, clip->w * 2, clip->h * 2 };
-                SDL_RenderCopy(renderer, idle.texture, clip, &renderQuad);
-            }
-            else if( (a_pressed || d_pressed) &&player.getVelocity().y == 0)
-            {
-                const SDL_Rect* clip = running.getCurrentClip();
-                SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY() - clip->h, clip->w * 2, clip->h * 2 };
-                SDL_RenderCopyEx(renderer, running.texture, clip, &renderQuad,NULL,NULL, flip);
-            }
-            else if (player.getVelocity().y != 0)
-            {
-                const SDL_Rect* clip = fall.getCurrentClip();
-                SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY() - clip->h, clip->w * 2, clip->h * 2 };
-                SDL_RenderCopy(renderer, fall.texture, clip, &renderQuad);
-            }
-            else if (mouse_down)
-            {
-                if (distance < 0) {
-                    const SDL_Rect* clip = ready.getCurrentClip();
-                    SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY() - clip->h, clip->w * 2, clip->h * 2 };
-                    SDL_RenderCopyEx(renderer, ready.texture, clip, &renderQuad,NULL,NULL, SDL_FLIP_HORIZONTAL);
-                }
-                else
+                if (player.isOnPlatform())
                 {
-                    const SDL_Rect* clip = ready.getCurrentClip();
-                    SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY() - clip->h, clip->w * 2, clip->h * 2 };
-                    SDL_RenderCopy(renderer, ready.texture, clip, &renderQuad);
+                    freefall = false;
+                }
+                if (mouse_pressed && player.isOnGround()) {
+                    Mix_PlayChannel(-1, fxClick, 0);
+                    mouseDownX = mouse_x;
+                    mouseDownY = mouse_y;
                 }
 
+                if (mouse_released && player.isOnGround()) {
+                    if (firstTime) {
+                        firstTime = false;
+                    }
+                    else {
+                        Mix_PlayChannel(-1, fxLaunch, 0);
+
+                        if (player.isOnPlatform())
+                            player.setY((int)player.getY() - 1);
+
+                        int velocityX = mouse_x - mouseDownX;
+                        int velocityY = mouse_y - mouseDownY;
+                        freefall = true;
+
+                        player.setVelocity((double)velocityX * .08, (double)velocityY * .08);
+                    }
+                }
+
+                checkPlayerCollision();
+                player.updatePosition();
+
+                if (player.getY() > screenHeight) {
+                    Mix_PlayChannel(-1, fxDeath, 0);
+                    resetGame();
+                }
+                for (int i = 0; i < 10; i++) {
+                    platforms[i].updatePosition();
+                }
+
+                lavaY = screenHeight - 60 - sin(timer) * 5;
+                timer += 0.05;
+                timer1 += 1;
+
+                SDL_SetRenderDrawColor(renderer, 238, 228, 225, 255);
+                SDL_RenderClear(renderer);
+
+                if (mouse_down && player.isOnGround()) {
+                    SDL_SetRenderDrawColor(renderer, 178, 150, 125, 255);
+                    SDL_RenderDrawLine(
+                        renderer,
+                        mouseDownX + (int)(player.getX() - mouseDownX) + (int)(player.getWidth() / 2),
+                        mouseDownY + (int)(player.getY() - mouseDownY) + (int)(player.getHeight() / 2),
+                        mouse_x + (int)(player.getX() - mouseDownX) + (int)(player.getWidth() / 2),
+                        mouse_y + (int)(player.getY() - mouseDownY) + (int)(player.getHeight() / 2)
+                    );
+                }
+
+                //DrawRectangle(player.getX(), player.getY(), player.getWidth(), player.getHeight(), WHITE);
+                double distance = (double)mouse_x - player.getX();
+                for (int i = 0; i < 10; i++) {
+                    SDL_Rect platformSprite_rect = { (int)platforms[i].getX(),(int)platforms[i].getY(), 100, 32 };
+                    SDL_RenderCopy(renderer, platformSprite, NULL, &platformSprite_rect);
+
+                    if (platforms[i].getHasCoin()) {
+                        SDL_Rect coinSprite_rect = { platforms[i].getCoinX(), platforms[i].getCoinY(), 24, 24 };
+                        SDL_RenderCopy(renderer, coinSprite, NULL, &coinSprite_rect);
+                    }
+                }
+                if (!a_pressed && !d_pressed && player.getVelocity().y == 0 && !mouse_down)
+                {
+                    const SDL_Rect* clip = idle.getCurrentClip();
+                    SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY() - clip->h, clip->w * 2, clip->h * 2 };
+                    SDL_RenderCopy(renderer, idle.texture, clip, &renderQuad);
+                }
+                else if ((a_pressed || d_pressed) && player.getVelocity().y == 0)
+                {
+                    const SDL_Rect* clip = running.getCurrentClip();
+                    SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY() - clip->h, clip->w * 2, clip->h * 2 };
+                    SDL_RenderCopyEx(renderer, running.texture, clip, &renderQuad, NULL, NULL, flip);
+                }
+                else if (player.getVelocity().y != 0)
+                {
+                    const SDL_Rect* clip = fall.getCurrentClip();
+                    SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY() - clip->h, clip->w * 2, clip->h * 2 };
+                    SDL_RenderCopy(renderer, fall.texture, clip, &renderQuad);
+                }
+                else if (mouse_down)
+                {
+                    if (distance < 0) {
+                        const SDL_Rect* clip = ready.getCurrentClip();
+                        SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY() - clip->h, clip->w * 2, clip->h * 2 };
+                        SDL_RenderCopyEx(renderer, ready.texture, clip, &renderQuad, NULL, NULL, SDL_FLIP_HORIZONTAL);
+                    }
+                    else
+                    {
+                        const SDL_Rect* clip = ready.getCurrentClip();
+                        SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY() - clip->h, clip->w * 2, clip->h * 2 };
+                        SDL_RenderCopy(renderer, ready.texture, clip, &renderQuad);
+                    }
+
+                }
+
+                SDL_Rect lavaSprite_rect = { 0, (int)lavaY, 1400, 60 };
+                SDL_RenderCopy(renderer, lavaSprite, NULL, &lavaSprite_rect);
+
+                SDL_Rect scoreBoxSprite_rect = { 17, 17, 102, 70 };
+                SDL_RenderCopy(renderer, scoreBoxSprite, NULL, &scoreBoxSprite_rect);
+
+                Draw_Font(renderer, score, 28, 20, 75, 64, 64, { 0, 0, 0 });
+                Draw_Font(renderer, highscore, 17, 90, 74, 32, 32, { 0, 0, 0 });
+
+                SDL_RenderPresent(renderer);
             }
-
-            SDL_Rect lavaSprite_rect = { 0, (int)lavaY, 1400, 48 };
-            SDL_RenderCopy(renderer, lavaSprite, NULL, &lavaSprite_rect);
-
-            SDL_Rect scoreBoxSprite_rect = { 17, 17, 102, 70 };
-            SDL_RenderCopy(renderer, scoreBoxSprite, NULL, &scoreBoxSprite_rect);
-
-            Draw_Font(renderer, score, 28, 20, 75, 64, 64, { 0, 0, 0 });
-            Draw_Font(renderer, highscore, 17, 90, 74, 32, 32, { 0, 0, 0 });
-
-            SDL_RenderPresent(renderer);
+            else {
+                SDL_RenderClear(renderer);
+                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 0);
+                SDL_RenderDrawLine(renderer, 0, 0, screenWidth, screenHeight);
+            }
         }
 
     }
