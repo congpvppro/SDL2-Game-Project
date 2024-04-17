@@ -33,6 +33,7 @@ char score[32];
 char highscore[32] ;
 
 bool titleScreen = true;
+bool startScreen = true;
 bool playCoinFX = false;
 
 
@@ -121,8 +122,8 @@ void checkPlayerCollision() {
     player.setOnPlatform(onPlatform);
 }
 
-void Draw_Font(SDL_Renderer* renderer, const char* str, int x, int y, int width, int height, int size, SDL_Color color) {
-    TTF_Font* font = TTF_OpenFont("resources/font.otf", size);
+void Draw_Font(SDL_Renderer* renderer, const char* str, int x, int y, int width, int height, int size, SDL_Color color, const char* path) {
+    TTF_Font* font = TTF_OpenFont(path, size);
 
     SDL_Surface* message_surf = TTF_RenderText_Blended(font, str, color);
     SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, message_surf);
@@ -146,7 +147,7 @@ int main(int argc, char** argv) {
     const int FPS = 144;
     const int frameDelay = 1000 / FPS;
 
-   
+    bool play = false, instruction = false, bestscore = false;
 
     int mouseDownX = 0;
     int mouseDownY = 0;
@@ -181,6 +182,23 @@ int main(int argc, char** argv) {
     // SetMasterVolume(0.3f);
     Animation idle, running,fall,ready;
 
+    SDL_Surface* return_surf = IMG_Load("resources/return.png");
+    SDL_Texture* return_tex = SDL_CreateTextureFromSurface(renderer, return_surf);
+    SDL_Surface* item2_surf = IMG_Load("resources/Item2.png");
+    SDL_Texture* item2 = SDL_CreateTextureFromSurface(renderer, item2_surf);
+    SDL_Surface* item5_surf = IMG_Load("resources/Item5.png");
+    SDL_Texture* item5 = SDL_CreateTextureFromSurface(renderer, item5_surf);
+    SDL_Surface* item3_surf = IMG_Load("resources/Item3.png");
+    SDL_Texture* item3 = SDL_CreateTextureFromSurface(renderer, item3_surf);
+    SDL_Surface* item4_surf = IMG_Load("resources/Item4.png");
+    SDL_Texture* item4 = SDL_CreateTextureFromSurface(renderer, item4_surf);
+    SDL_Surface* lightning_surf = IMG_Load("resources/lightning.png");
+    SDL_Texture* lightning = SDL_CreateTextureFromSurface(renderer, lightning_surf);
+    SDL_Surface* award_surf = IMG_Load("resources/award.png");
+    SDL_Texture* award = SDL_CreateTextureFromSurface(renderer, award_surf);
+    SDL_Surface* crown_surf = IMG_Load("resources/crown.png");
+    SDL_Texture* crown = SDL_CreateTextureFromSurface(renderer, crown_surf);
+
     SDL_Surface* playerSprite_surf = IMG_Load("resources/egg1.png");
     SDL_Surface* lavaSprite_surf = IMG_Load("resources/lava.png");
     SDL_Surface* platformSprite_surf = IMG_Load("resources/platform.png");
@@ -202,8 +220,20 @@ int main(int argc, char** argv) {
     Mix_Chunk* fxClick = Mix_LoadWAV("resources/click.wav");
     Mix_Chunk* fxDeath = Mix_LoadWAV("resources/die.wav");
     Mix_Chunk* fxCoin = Mix_LoadWAV("resources/coin.wav");
-    Mix_Chunk* fxSplash = Mix_LoadWAV("resources/splash.wav");
-    Mix_Chunk* fxSelect = Mix_LoadWAV("resources/select.wav");
+    Mix_Chunk* fxSplash = Mix_LoadWAV("resources/splash1.wav");
+    Mix_Chunk* fxSelect = Mix_LoadWAV("resources/select1.wav");
+    Mix_Chunk* fxguide = Mix_LoadWAV("resources/enterguide.wav");
+
+    SDL_Rect return_rect = { 32 , 32, 50 , 50 };
+    SDL_Rect item2_rect = { screenWidth / 2 - 400, screenHeight / 2 - 300, 800 , 200 };
+    SDL_Rect item4_rect = { screenWidth / 2 - 380, screenHeight / 2 - 350, 760 , 300 };
+    SDL_Rect item3_rect = { screenWidth / 2 - 200, screenHeight / 2 - 50, 400 , 400 };
+    SDL_Rect item5_rect1 = { screenWidth / 2 - 150, screenHeight / 2, 300 , 80 };
+    SDL_Rect item5_rect2 = { screenWidth / 2 - 150, screenHeight / 2 + 115, 300 , 80 };
+    SDL_Rect item5_rect3 = { screenWidth / 2 - 150, screenHeight / 2 + 230, 300 , 80 };
+    SDL_Rect lightning_rect = { screenWidth / 2 - 165, screenHeight / 2 - 10, 70 , 100 };
+    SDL_Rect award_rect = { screenWidth / 2 - 165, screenHeight / 2 + 105, 70 , 100 };
+    SDL_Rect crown_rect = { screenWidth / 2 - 175, screenHeight / 2 + 210, 90 , 100 };
 
     idle.init(charactertex, IDLE_FRAMES, IDLE_CLIPS);
     running.init(charactertex, RUNNING_FRAMES, RUNNING_CLIPS);
@@ -218,7 +248,7 @@ int main(int argc, char** argv) {
 
     bool freefall = false;
 
-    bool pause = false;
+    bool pause = false, playedsound = false;
 
     SDL_RendererFlip flip = SDL_FLIP_NONE;
 
@@ -242,16 +272,22 @@ int main(int argc, char** argv) {
                 {
                     switch (e.key.keysym.sym) {
                     case SDLK_a:
-                        player.setVelocity(-3, 0);
+                        player.setVelocity(-5, 0);
                         a_pressed = true;
                         flip = SDL_FLIP_HORIZONTAL;
+                        startScreen = false;
                         break;
                     case SDLK_d:
-                        player.setVelocity(3, 0);
+                        player.setVelocity(5, 0);
                         d_pressed = true;
+                        startScreen = false;
                         break;
                     case SDLK_ESCAPE:
                         pause = true;
+                        break;
+                    default:
+                        startScreen = false;
+                        break;
                     }
                 }
                 else  if (e.type == SDL_KEYUP)
@@ -303,18 +339,18 @@ int main(int argc, char** argv) {
                     Mix_PlayChannel(-1, fxSelect, 0);
                     playedSelect = true;
                 }
+               
+                    SDL_SetRenderDrawColor(renderer, 238, 228, 225, 255);
+                    SDL_RenderClear(renderer);
 
-                SDL_SetRenderDrawColor(renderer, 238, 228, 225, 255);
-                SDL_RenderClear(renderer);
+                    SDL_Rect logo_rect = { screenWidth / 2 - 400, screenHeight / 2 - 285 - 30, 800, 570 };
+                    SDL_RenderCopy(renderer, logo, NULL, &logo_rect);
 
-                SDL_Rect logo_rect = { screenWidth / 2 - 400, screenHeight / 2 - 285 - 30, 800, 570 };
-                SDL_RenderCopy(renderer, logo, NULL, &logo_rect);
+                    Draw_Font(renderer, highscore, screenWidth / 2 - 37, screenHeight / 2 + 10, 74, 32, 32, { 178, 150, 125 }, "resources/font.otf");
+                    Draw_Font(renderer, "PRESS ANY KEY TO BEGIN", screenWidth / 2 - 134, screenHeight / 2 + 50, 268, 32, 32, { 178, 150, 125 }, "resources/font.otf");
 
-                Draw_Font(renderer, highscore, screenWidth / 2 - 37, screenHeight / 2 + 10, 74, 32, 32, { 0, 0, 0 });
-                Draw_Font(renderer, "CLICK ANYWHERE TO BEGIN", screenWidth / 2 - 134, screenHeight / 2 + 50, 268, 32, 32, { 178, 150, 125 });
-
-                SDL_RenderPresent(renderer);
-
+                    SDL_RenderPresent(renderer);
+                
                 if (mouse_pressed) {
                     Mix_PlayChannel(-1, fxSelect, 0);
                     titleScreen = false;
@@ -331,7 +367,7 @@ int main(int argc, char** argv) {
                 SDL_SetRenderDrawColor(renderer, 238, 228, 225, 255);
                 SDL_RenderClear(renderer);
 
-                Draw_Font(renderer, "LE ProcG", screenWidth / 2 - 54, screenHeight / 2 + 3, 108, 32, 32, { 213, 128, 90 });
+                Draw_Font(renderer, "LE ProcG", screenWidth / 2 - 54, screenHeight / 2 + 3, 108, 32, 32, { 213, 128, 90 }, "resources/font.otf");
 
                 SDL_Rect splashEggSprite_rect = { screenWidth / 2 - 16, screenHeight / 2 - 16 - 23, 32, 32 };
                 SDL_RenderCopy(renderer, splashEggSprite, NULL, &splashEggSprite_rect);
@@ -342,7 +378,75 @@ int main(int argc, char** argv) {
             }
         }
         else {
-            if (!pause) {
+            if (!play && !instruction) {
+                SDL_SetRenderDrawColor(renderer, 240, 235, 227, 0);
+                SDL_RenderClear(renderer);
+                
+
+                SDL_RenderCopy(renderer, item2, NULL, &item2_rect);
+                SDL_RenderCopy(renderer, item4, NULL, &item4_rect);
+                SDL_RenderCopy(renderer, item3, NULL, &item3_rect);
+                SDL_RenderCopy(renderer, item5, NULL, &item5_rect1);
+                SDL_RenderCopy(renderer, item5, NULL, &item5_rect2);
+                SDL_RenderCopy(renderer, item5, NULL, &item5_rect3);
+                if (mouse_x >= screenWidth / 2 - 150 && mouse_x <= screenWidth / 2 + 150 && mouse_y >= screenHeight / 2 && mouse_y <= screenHeight / 2 + 80)
+                {
+                    Draw_Font(renderer, "PLAY", screenWidth / 2 - 60, screenHeight / 2 + 20, 130, 40, 100, { 170, 215, 217 }, "resources/Kaph.otf");
+
+                    Draw_Font(renderer, "INSTRUCTION", screenWidth / 2 - 70, screenHeight / 2 + 130, 180, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
+                    Draw_Font(renderer, "HIGHSCORE", screenWidth / 2 - 65, screenHeight / 2 + 245, 170, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
+                    if (mouse_pressed)
+                    {
+                        play = true;
+                    }
+                }
+                else if (mouse_x >= screenWidth / 2 - 150 && mouse_x <= screenWidth / 2 + 150 && mouse_y >= screenHeight / 2 + 115 && mouse_y <= screenHeight / 2 + 195)
+                {
+                    Draw_Font(renderer, "INSTRUCTION", screenWidth / 2 - 65, screenHeight / 2 + 135, 150, 40, 100, { 170, 215, 217 }, "resources/Kaph.otf");
+                    Draw_Font(renderer, "PLAY", screenWidth / 2 - 65, screenHeight / 2 + 15, 150, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
+                    Draw_Font(renderer, "HIGHSCORE", screenWidth / 2 - 65, screenHeight / 2 + 245, 170, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
+                    if (mouse_pressed)
+                    {
+                        instruction = true;
+                    }
+                }
+                else if (mouse_x >= screenWidth / 2 - 150 && mouse_x <= screenWidth / 2 + 150 && mouse_y >= screenHeight / 2 + 210 && mouse_y <= screenHeight / 2 + 290)
+                {
+                    Draw_Font(renderer, "HIGHSCORE", screenWidth / 2 - 60, screenHeight / 2 + 250, 150, 40, 100, { 170, 215, 217 }, "resources/Kaph.otf");
+                    Draw_Font(renderer, "PLAY", screenWidth / 2 - 65, screenHeight / 2 + 15, 150, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
+                    Draw_Font(renderer, "INSTRUCTION", screenWidth / 2 - 70, screenHeight / 2 + 130, 180, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
+                    if (mouse_pressed)
+                    {
+                        bestscore = true;
+                    }
+                }
+                else {
+                    Draw_Font(renderer, "PLAY", screenWidth / 2 - 65, screenHeight / 2 + 15, 150, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
+                    Draw_Font(renderer, "INSTRUCTION", screenWidth / 2 - 70, screenHeight / 2 + 130, 180, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
+                    Draw_Font(renderer, "HIGHSCORE", screenWidth / 2 - 65, screenHeight / 2 + 245, 170, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
+                }
+                SDL_RenderCopy(renderer, lightning, NULL, &lightning_rect);
+                SDL_RenderCopy(renderer, crown, NULL, &crown_rect);
+                SDL_RenderCopy(renderer, award, NULL, &award_rect);
+                SDL_RenderPresent(renderer);
+            }
+            else if (instruction)
+            {
+                SDL_SetRenderDrawColor(renderer, 240, 235, 227, 0);
+                SDL_RenderClear(renderer);
+                Draw_Font(renderer, "Use A and D or <- and -> to move, hold and release left mouse button to jump.", screenWidth / 2 - 443, screenHeight / 2, 886, 32, 32, { 178, 150, 125 }, "resources/font.otf");
+                SDL_RenderCopy(renderer, return_tex, NULL, &return_rect);
+                if (mouse_x >= 32 && mouse_x <= 82 && mouse_y >= 32 && mouse_y <= 82)
+                {
+                    if (mouse_pressed)
+                    {
+                        instruction = false;
+                    }
+                }
+                SDL_RenderPresent(renderer);
+            }
+            else if (play)
+            {
                 if (playCoinFX) {
                     Mix_PlayChannel(-1, fxCoin, 0);
                     playCoinFX = false;
@@ -455,19 +559,18 @@ int main(int argc, char** argv) {
                 SDL_Rect scoreBoxSprite_rect = { 17, 17, 102, 70 };
                 SDL_RenderCopy(renderer, scoreBoxSprite, NULL, &scoreBoxSprite_rect);
 
-                Draw_Font(renderer, score, 28, 20, 75, 64, 64, { 0, 0, 0 });
-                Draw_Font(renderer, highscore, 17, 90, 74, 32, 32, { 0, 0, 0 });
+                Draw_Font(renderer, score, 28, 20, 75, 64, 64, { 0, 0, 0 }, "resources/font.otf");
+                Draw_Font(renderer, highscore, 17, 90, 74, 32, 32, { 0, 0, 0 }, "resources/font.otf");
 
                 SDL_RenderPresent(renderer);
             }
-            else {
-                SDL_RenderClear(renderer);
-                SDL_SetRenderDrawColor(renderer, 255, 255, 0, 0);
-                SDL_RenderDrawLine(renderer, 0, 0, screenWidth, screenHeight);
-            }
+
+
+        }
+            
         }
 
-    }
+    
 
     SDL_DestroyTexture(playerSprite);
     SDL_DestroyTexture(lavaSprite);
