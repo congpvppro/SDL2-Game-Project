@@ -137,8 +137,12 @@
   <ItemGroup>
     <ClInclude Include="Animation.h" />
     <ClInclude Include="defs.h" />
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="Graphics.h" />
     <ClInclude Include="platform.h" />
     <ClInclude Include="player.h" />
+    <ClInclude Include="Score.h" />
+    <ClInclude Include="ScrollingBackground.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
