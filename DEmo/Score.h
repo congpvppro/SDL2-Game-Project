@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 #include <string>
 #include <algorithm>
 #include <fstream>
@@ -26,6 +25,7 @@ struct Score {
         if (is_empty(input))
         {
             s = 0;
+            std::cout << "ERROR" << std::endl;
             sprintf_s(highscore, "BEST: %d", highscoreInt);
         }
         else

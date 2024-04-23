@@ -17,6 +17,7 @@ struct Game {
     Mix_Chunk* fxguide = Mix_LoadWAV("resources/enterguide.wav");
     Mix_Chunk* fxchoose = Mix_LoadWAV("resources/choose.wav");
     SDL_Rect return_rect = { 32 , 32, 50 , 50 };
+    SDL_Rect preturn_rect = { 37 , 37, 40 , 40 };
     SDL_Rect item2_rect = { SCREEN_WIDTH / 2 - 400, SCREEN_HEIGHT / 2 - 300, 800 , 200 };
     SDL_Rect item4_rect = { SCREEN_WIDTH / 2 - 380, SCREEN_HEIGHT / 2 - 350, 760 , 300 };
     SDL_Rect item3_rect = { SCREEN_WIDTH / 2 - 200, SCREEN_HEIGHT / 2 - 50, 400 , 400 };
@@ -35,10 +36,10 @@ struct Game {
     SDL_Rect musicoff_rect = { SCREEN_WIDTH - 82, SCREEN_HEIGHT - 82, 50, 50 };
     SDL_Rect soundon_rect = { SCREEN_WIDTH - 82, SCREEN_HEIGHT - 142, 50, 50 };
     SDL_Rect soundoff_rect = { SCREEN_WIDTH - 82, SCREEN_HEIGHT - 142, 50, 50 };
-    SDL_Rect pmusicon_rect = { SCREEN_WIDTH - 72, SCREEN_HEIGHT - 72, 40, 40 };
-    SDL_Rect pmusicoff_rect = { SCREEN_WIDTH - 72, SCREEN_HEIGHT - 72, 40, 40 };
-    SDL_Rect psoundon_rect = { SCREEN_WIDTH - 72, SCREEN_HEIGHT - 132, 40, 40 };
-    SDL_Rect psoundoff_rect = { SCREEN_WIDTH - 72, SCREEN_HEIGHT - 132, 40, 40 };
+    SDL_Rect pmusicon_rect = { SCREEN_WIDTH - 72, SCREEN_HEIGHT - 77, 40, 40 };
+    SDL_Rect pmusicoff_rect = { SCREEN_WIDTH - 72, SCREEN_HEIGHT - 77, 40, 40 };
+    SDL_Rect psoundon_rect = { SCREEN_WIDTH - 72, SCREEN_HEIGHT - 137, 40, 40 };
+    SDL_Rect psoundoff_rect = { SCREEN_WIDTH - 72, SCREEN_HEIGHT - 137, 40, 40 };
     Mix_Music* music = Mix_LoadMUS("resources/arcade.ogg");
     
 
@@ -185,14 +186,17 @@ struct Game {
         SDL_SetRenderDrawColor(graphics.renderer, 240, 235, 227, 0);
         SDL_RenderClear(graphics.renderer);
         graphics.Draw_Font("Use A and D or <- and -> to move, hold and release left mouse button to jump.", SCREEN_WIDTH / 2 - 443, SCREEN_HEIGHT / 2, 886, 32, 32, { 178, 150, 125 }, "resources/font.otf");
-        SDL_RenderCopy(graphics.renderer, return_tex, NULL, &return_rect);
         if (mouse_x >= 32 && mouse_x <= 82 && mouse_y >= 32 && mouse_y <= 82)
         {
+            SDL_RenderCopy(graphics.renderer, return_tex, NULL, &preturn_rect);
+
             if (mouse_pressed)
             {
                 instruction = false;
             }
         }
+        else        SDL_RenderCopy(graphics.renderer, return_tex, NULL, &return_rect);
+
         graphics.presentScene();
     }
 
@@ -201,14 +205,17 @@ struct Game {
         SDL_SetRenderDrawColor(graphics.renderer, 240, 235, 227, 0);
         SDL_RenderClear(graphics.renderer);
         graphics.Draw_Font(graphics.score.highscore, SCREEN_WIDTH / 2 - 40, SCREEN_HEIGHT / 2 - 16, 80, 32, 32, { 0, 0, 0 }, "resources/font.otf");
-        SDL_RenderCopy(graphics.renderer, return_tex, NULL, &return_rect);
         if (mouse_x >= 32 && mouse_x <= 82 && mouse_y >= 32 && mouse_y <= 82)
         {
+            SDL_RenderCopy(graphics.renderer, return_tex, NULL, &preturn_rect);
+
             if (mouse_pressed)
             {
                 bestscore = false;
             }
         }
+        else        SDL_RenderCopy(graphics.renderer, return_tex, NULL, &return_rect);
+
         graphics.presentScene();
 
     }
