@@ -49,7 +49,7 @@ struct Game {
         SDL_Rect dest = { x, y, w, h };
         SDL_RenderCopy(graphics.renderer, texture, NULL, &dest);
     }
-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
     void renderBackground(ScrollingBackground& background, Graphics& graphics, int y, int w, int h)
     {
         renderTexture(graphics, background.texture, background.scrollingOffset, y, w, h);
@@ -80,7 +80,7 @@ struct Game {
         }
     }
 
-    void renderPreStart(Graphics& graphics, SDL_Texture* splashEggSprite, double& splashTimer, bool& playedSplash)
+    void renderPreStart(Graphics& graphics, SDL_Texture* splashEggSprite, double& splashTimer,int & timer1, bool& playedSplash, Animation& running)
     {
         if (!playedSplash) {
             Mix_PlayChannel(-1, fxSplash, 0);
@@ -92,15 +92,18 @@ struct Game {
 
         graphics.Draw_Font("LE ProcG", SCREEN_WIDTH / 2 - 54, SCREEN_HEIGHT / 2 + 3, 108, 32, 32, { 213, 128, 90 }, "resources/font.otf");
 
-        SDL_Rect splashEggSprite_rect = { SCREEN_WIDTH / 2 - 16, SCREEN_HEIGHT / 2 - 16 - 23, 32, 32 };
-        SDL_RenderCopy(graphics.renderer, splashEggSprite, NULL, &splashEggSprite_rect);
+        
+        const SDL_Rect* clip = running.getCurrentClip();
+        SDL_Rect renderQuad = { SCREEN_WIDTH / 2 - 32, SCREEN_HEIGHT / 2 - 32 - 35, 64, 64 };
+        SDL_RenderCopyEx(graphics.renderer, running.texture, clip, &renderQuad, NULL, NULL, SDL_FLIP_NONE);
 
         graphics.presentScene();
 
         splashTimer += 1;
+        timer1 += 1;
     }
 
-    void renderMenu(Graphics& graphics, bool& play, bool& instruction, bool& bestscore, int& mouse_x, int& mouse_y, bool& mouse_pressed, SDL_Texture* musicon, SDL_Texture* musicoff, SDL_Texture* soundon, SDL_Texture* soundoff,SDL_Texture* M, SDL_Texture* E, SDL_Texture* N, SDL_Texture* U, SDL_Texture* chamthan, SDL_Texture* item2, SDL_Texture* item3, SDL_Texture* item4, SDL_Texture* item5, SDL_Texture* lightning, SDL_Texture* crown, SDL_Texture* award)
+    void renderMenu(Graphics& graphics ,bool& play, bool& instruction, bool& bestscore, int& mouse_x, int& mouse_y, bool& mouse_pressed, SDL_Texture* musicon, SDL_Texture* musicoff, SDL_Texture* soundon, SDL_Texture* soundoff,SDL_Texture* M, SDL_Texture* E, SDL_Texture* N, SDL_Texture* U, SDL_Texture* chamthan, SDL_Texture* item2, SDL_Texture* item3, SDL_Texture* item4, SDL_Texture* item5, SDL_Texture* lightning, SDL_Texture* crown, SDL_Texture* award)
     {
         graphics.play(music, bmusicoff);
         SDL_SetRenderDrawColor(graphics.renderer, 240, 235, 227, 0);
@@ -119,7 +122,7 @@ struct Game {
         SDL_RenderCopyEx(graphics.renderer, E, NULL, &E_rect, -10.0f, NULL, SDL_FLIP_NONE);
         SDL_RenderCopyEx(graphics.renderer, N, NULL, &N_rect, 10.0f, NULL, SDL_FLIP_NONE);
         SDL_RenderCopyEx(graphics.renderer, U, NULL, &U_rect, 10.0f, NULL, SDL_FLIP_NONE);
-        
+       
         if (mouse_x >= SCREEN_WIDTH / 2 - 150 && mouse_x <= SCREEN_WIDTH / 2 + 150 && mouse_y >= SCREEN_HEIGHT / 2 && mouse_y <= SCREEN_HEIGHT / 2 + 80)
         {
 
@@ -186,7 +189,7 @@ struct Game {
         SDL_SetRenderDrawColor(graphics.renderer, 240, 235, 227, 0);
         SDL_RenderClear(graphics.renderer);
         graphics.Draw_Font("Use A and D or <- and -> to move, hold and release left mouse button to jump.", SCREEN_WIDTH / 2 - 443, SCREEN_HEIGHT / 2, 886, 32, 32, { 178, 150, 125 }, "resources/font.otf");
-        if (mouse_x >= 32 && mouse_x <= 82 && mouse_y >= 32 && mouse_y <= 82)
+         if (mouse_x >= 32 && mouse_x <= 82 && mouse_y >= 32 && mouse_y <= 82)
         {
             SDL_RenderCopy(graphics.renderer, return_tex, NULL, &preturn_rect);
 
@@ -220,12 +223,12 @@ struct Game {
 
     }
 
-    void renderGame(Graphics& graphics, ScrollingBackground& background, ScrollingBackground& sky, SDL_RendererFlip& flip, bool& a_pressed, bool& mouse_down, bool& d_pressed, int& mouse_x, int& mouse_y, Animation& idle, Animation& running, Animation& fall, Animation& ready, SDL_Texture* lavaSprite, SDL_Texture* scoreBoxSprite, SDL_Texture* platformSprite, SDL_Texture* coinSprite)
+    void renderGame(Graphics& graphics, ScrollingBackground& background, ScrollingBackground& sky, SDL_RendererFlip& flip, bool& play,bool& mouse_pressed, bool& a_pressed, bool& mouse_down, bool& d_pressed, int& mouse_x, int& mouse_y, Animation& idle, Animation& running, Animation& fall, Animation& ready, SDL_Texture* lavaSprite, SDL_Texture* scoreBoxSprite, SDL_Texture* platformSprite, SDL_Texture* coinSprite, SDL_Texture* return_tex, SDL_Texture*menu)
     {
         graphics.play(music, bmusicoff);
 
         
-        background.scroll(2);
+        background.scroll(3);
         sky.scroll(1);
        
         SDL_SetRenderDrawColor(graphics.renderer, 238, 228, 225, 255);
@@ -257,32 +260,33 @@ struct Game {
         if (!a_pressed && !d_pressed && player.getVelocity().y == 0 && !mouse_down)
         {
             const SDL_Rect* clip = idle.getCurrentClip();
-            SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY() - clip->h, clip->w * 2, clip->h * 2 };
+            SDL_Rect renderQuad = { (int)player.getX() ,(int)player.getY() , clip->w * 2 , clip->h * 2 };
             SDL_RenderCopy(graphics.renderer, idle.texture, clip, &renderQuad);
         }
         else if ((a_pressed || d_pressed) && player.getVelocity().y == 0)
         {
             const SDL_Rect* clip = running.getCurrentClip();
-            SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY() - clip->h, clip->w * 2, clip->h * 2 };
+            SDL_Rect renderQuad = { (int)player.getX() ,(int)player.getY() , clip->w * 2, clip->h * 2 };
             SDL_RenderCopyEx(graphics.renderer, running.texture, clip, &renderQuad, NULL, NULL, flip);
+            std::cout << player.getY() + player.getHeight() << " " << platforms[0].getY() << " " << platforms[0].getX() + platforms[0].getWidth() << " " << clip->w << " " << clip->h << std::endl;
         }
         else if (player.getVelocity().y != 0)
         {
             const SDL_Rect* clip = fall.getCurrentClip();
-            SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY() - clip->h, clip->w * 2, clip->h * 2 };
+            SDL_Rect renderQuad = { (int)player.getX() ,(int)player.getY() , clip->w * 2 , clip->h * 2 };
             SDL_RenderCopy(graphics.renderer, fall.texture, clip, &renderQuad);
         }
         else if (mouse_down)
         {
             if (distance < 0) {
                 const SDL_Rect* clip = ready.getCurrentClip();
-                SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY() - clip->h, clip->w * 2, clip->h * 2 };
+                SDL_Rect renderQuad = { (int)player.getX() ,(int)player.getY() , clip->w * 2, clip->h * 2 };
                 SDL_RenderCopyEx(graphics.renderer, ready.texture, clip, &renderQuad, NULL, NULL, SDL_FLIP_HORIZONTAL);
             }
             else
             {
                 const SDL_Rect* clip = ready.getCurrentClip();
-                SDL_Rect renderQuad = { (int)player.getX() - clip->w,(int)player.getY() - clip->h, clip->w * 2, clip->h * 2 };
+                SDL_Rect renderQuad = { (int)player.getX() ,(int)player.getY() , clip->w * 2, clip->h * 2 };
                 SDL_RenderCopy(graphics.renderer, ready.texture, clip, &renderQuad);
             }
 
@@ -295,6 +299,43 @@ struct Game {
 
         graphics.Draw_Font(graphics.score.score, 28, 20, 75, 64, 100, { 0, 0, 0 }, "resources/font.otf");
         graphics.Draw_Font(graphics.score.highscore, 28, 90, 74, 32, 100, { 0, 0, 0 }, "resources/font.otf");
+        if (graphics.gameOver)
+        {
+            SDL_Rect restart_rect = { SCREEN_WIDTH / 2 - 100 - 30, SCREEN_HEIGHT / 2 - 50, 100, 100 };
+            SDL_Rect prestart_rect = { SCREEN_WIDTH / 2 - 90 - 30, SCREEN_HEIGHT / 2 - 40, 80, 80 };
+
+            SDL_Rect menu_rect = { SCREEN_WIDTH / 2  + 30, SCREEN_HEIGHT / 2 - 50, 100, 100 };
+            SDL_Rect pmenu_rect = { SCREEN_WIDTH / 2 + 40, SCREEN_HEIGHT / 2 - 40, 80, 80 };
+
+            if (mouse_x >= SCREEN_WIDTH / 2 - 100 - 30 && mouse_x <= SCREEN_WIDTH / 2 - 30 && mouse_y >= SCREEN_HEIGHT / 2 - 50 && mouse_y <= SCREEN_HEIGHT / 2 + 50)
+            {
+                SDL_RenderCopy(graphics.renderer, return_tex, NULL, &prestart_rect);
+
+                if (mouse_pressed)
+                {
+                    graphics.gameOver = false;
+                    graphics.restart = true;
+                }
+            }
+            else SDL_RenderCopy(graphics.renderer, return_tex, NULL, &restart_rect);
+
+            if (mouse_x >= SCREEN_WIDTH / 2 + 30 && mouse_x <= SCREEN_WIDTH / 2 +130 && mouse_y >= SCREEN_HEIGHT / 2 - 50 && mouse_y <= SCREEN_HEIGHT / 2 + 50)
+            {
+                SDL_RenderCopy(graphics.renderer, menu, NULL, &pmenu_rect);
+
+
+                if (mouse_pressed)
+                {
+                    play = false;
+                    graphics.gameOver = false;
+                    graphics.freefall = false;
+                    graphics.resetGame(mouse_down);
+                    
+                }
+            }
+            else  SDL_RenderCopy(graphics.renderer, menu, NULL, &menu_rect);
+
+        }
 
         graphics.presentScene();
     }

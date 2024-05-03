@@ -103,15 +103,18 @@ int SDL_RenderFillCircle(SDL_Renderer* renderer, int x, int y, int radius)
 }
 
 Platform platforms[10] = { {0}, {1}, {2}, {3}, {4}, {5},{6},{7},{8},{9} };
-Player player(platforms[0].getX() + platforms[0].getWidth() / 2 + 32 / 2, platforms[0].getY() - player.getHeight(), 32, 32);
+Player player(platforms[0].getX() + platforms[0].getWidth() / 2 + 32 / 2, platforms[0].getY() - player.getHeight() -32, 64, 64);
 struct Graphics {
     SDL_Renderer* renderer;
     SDL_Window* window;
+    bool freefall = false;
     bool playCoinFX = true;
+    bool played = false;
+    bool gameOver = false;
+    bool restart = false;
     bool firstTime = true;
     double lavaY = SCREEN_HEIGHT - 40;
     double timer = 0;
-    int timer1 = 0;
     int mouseDownX, mouseDownY;
     Mix_Chunk* fxLaunch = Mix_LoadWAV("resources/launch.wav");
     Mix_Chunk* fxClick = Mix_LoadWAV("resources/click.wav");
@@ -134,6 +137,7 @@ struct Graphics {
             logErrorAndExit("SDL_Init", SDL_GetError());
 
         window = SDL_CreateWindow("SUNNYLAND", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+        std::cout << SCREEN_HEIGHT << " " << SCREEN_WIDTH << std::endl;
 
         if (window == nullptr) logErrorAndExit("CreateWindow", SDL_GetError());
 
@@ -154,7 +158,7 @@ struct Graphics {
 
     }
 
-    void update(double& timer, int& timer1, bool& mouse_pressed, bool& mouse_released, bool& mouse_down, bool& freefall, int& mouse_x, int& mouse_y, Mix_Chunk* fxLaunch , Mix_Chunk* fxClick , Mix_Chunk* fxDeath ,Mix_Chunk* fxCoin  )
+    void update(Graphics& graphics, SDL_Texture* returntex, SDL_Texture* menu,int& timer1, bool& mouse_pressed, bool& mouse_released, bool& mouse_down, int& mouse_x, int& mouse_y, Mix_Chunk* fxLaunch, Mix_Chunk* fxClick, Mix_Chunk* fxDeath, Mix_Chunk* fxCoin)
     {
         if (playCoinFX) {
             Mix_PlayChannel(-1, fxCoin, 0);
@@ -164,6 +168,8 @@ struct Graphics {
         {
             freefall = false;
         }
+        else freefall = true;
+
         if (mouse_pressed && player.isOnGround()) {
             Mix_PlayChannel(-1, fxClick, 0);
             mouseDownX = mouse_x;
@@ -176,13 +182,13 @@ struct Graphics {
             }
             else {
                 Mix_PlayChannel(-1, fxLaunch, 0);
+                
 
                 if (player.isOnPlatform())
                     player.setY((int)player.getY() - 1);
 
                 int velocityX = mouse_x - mouseDownX;
                 int velocityY = mouse_y - mouseDownY;
-                freefall = true;
 
                 player.setVelocity((double)velocityX * .08, (double)velocityY * .08);
             }
@@ -192,8 +198,12 @@ struct Graphics {
         player.updatePosition();
 
         if (player.getY() > SCREEN_HEIGHT) {
-            Mix_PlayChannel(-1, fxDeath, 0);
-            resetGame();
+            if (!played) {
+                played = true;
+                Mix_PlayChannel(-1, fxDeath, 0);
+                gameOver = true;
+            }
+            if (restart) { resetGame(mouse_down); }
         }
         for (int i = 0; i < 10; i++) {
             platforms[i].updatePosition();
@@ -201,8 +211,7 @@ struct Graphics {
 
         lavaY = SCREEN_HEIGHT - 50 - sin(timer) * 5;
         timer += 0.05;
-        timer1 += 1;
-
+        timer1++;
     }
 
     void presentScene()
@@ -244,15 +253,19 @@ struct Graphics {
         TTF_CloseFont(font);
     }
 
-    void resetGame() {
+    void resetGame(bool& mouse_down) {
+        restart = false;
+        freefall = false;
+        mouse_down = false;
         score.resetScore();
-
+        played = false;
+        gameOver = false;
         for (int i = 0; i < 10; i++)
             platforms[i] = Platform(i);
-
         player.setVelocity(0, 0);
         player.setX((int)platforms[0].getX() + (int)platforms[0].getWidth() / 2 - 26 / 2);
         player.setY((int)platforms[0].getY() - (int)player.getHeight());
+
     }
 
     void checkPlayerCollision(bool& playCoinFX) {
@@ -265,7 +278,7 @@ struct Graphics {
                 playCoinFX = true;
             }
 
-            if (player.getX() + 1 < platforms[i].getX() + platforms[i].getWidth() && player.getX() + player.getWidth() > platforms[i].getX() && player.getY() + player.getHeight() >= platforms[i].getY() && player.getY() < platforms[i].getY() + platforms[i].getHeight()) {
+            if (player.getX() + 21 < platforms[i].getX() + platforms[i].getWidth() && player.getX() + player.getWidth() -21 > platforms[i].getX() && player.getY() + player.getHeight() >= platforms[i].getY() && player.getY() < platforms[i].getY() + platforms[i].getHeight()) {
                 if (player.getY() > platforms[i].getY() + platforms[i].getHeight() / 2) {
                     player.setVelocity(player.getVelocity().x, 5);
                 }
@@ -275,10 +288,13 @@ struct Graphics {
                     player.setY((int)player.getY() + 1);
                 }
             }
+           
+           
+
         }
         player.setOnPlatform(onPlatform);
     }
-    
+
     Mix_Music* loadMusic(const char* path)
     {
         Mix_Music* gMusic = Mix_LoadMUS(path);
@@ -288,7 +304,7 @@ struct Graphics {
         }
         return gMusic;
     }
-    void play(Mix_Music* gMusic, bool &stopmusic)
+    void play(Mix_Music* gMusic, bool& stopmusic)
     {
         if (gMusic == nullptr) return;
         if (!stopmusic) {
@@ -304,6 +320,7 @@ struct Graphics {
             Mix_PauseMusic();
         }
     }
+
 };
 
 #endif // _GRAPHICS__H
