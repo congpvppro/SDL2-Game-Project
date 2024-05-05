@@ -11,9 +11,11 @@ private:
     bool hasCoin;
     int coinX;
     int coinY;
-
+    int speed;
+    int cnt;
 public:
     Platform(int index);
+    int getSpeed();
     double getX();
     double getY();
     int getWidth();
@@ -22,6 +24,6 @@ public:
     void setHasCoin(bool value);
     int getCoinX();
     int getCoinY();
-    void updatePosition();
+    void updatePosition(int &speed);
 };
 #endif

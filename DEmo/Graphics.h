@@ -115,6 +115,7 @@ struct Graphics {
     bool firstTime = true;
     double lavaY = SCREEN_HEIGHT - 40;
     double timer = 0;
+    int speed = 1;
     int mouseDownX, mouseDownY;
     Mix_Chunk* fxLaunch = Mix_LoadWAV("resources/launch.wav");
     Mix_Chunk* fxClick = Mix_LoadWAV("resources/click.wav");
@@ -206,7 +207,8 @@ struct Graphics {
             if (restart) { resetGame(mouse_down); }
         }
         for (int i = 0; i < 10; i++) {
-            platforms[i].updatePosition();
+            platforms[i].updatePosition(speed);
+            std::cout << speed << "speed " << std::endl;
         }
 
         lavaY = SCREEN_HEIGHT - 50 - sin(timer) * 5;
@@ -277,16 +279,27 @@ struct Graphics {
                 platforms[i].setHasCoin(false);
                 playCoinFX = true;
             }
-
+             
             if (player.getX() + 21 < platforms[i].getX() + platforms[i].getWidth() && player.getX() + player.getWidth() -21 > platforms[i].getX() && player.getY() + player.getHeight() >= platforms[i].getY() && player.getY() < platforms[i].getY() + platforms[i].getHeight()) {
-                if (player.getY() > platforms[i].getY() + platforms[i].getHeight() / 2) {
+                if (player.getY() > platforms[i].getY()   ) {
                     player.setVelocity(player.getVelocity().x, 5);
+                    std::cout << "bounce1" << std::endl;
+
                 }
                 else if (player.getY() + player.getHeight() < platforms[i].getY() + platforms[i].getHeight()) {
                     onPlatform = true;
                     player.setY((int)platforms[i].getY() - (int)player.getHeight());
-                    player.setY((int)player.getY() + 1);
+                    player.setY((int)player.getY() + speed);
                 }
+            }
+            if (((player.getX() + 21 > platforms[i].getX() + platforms[i].getWidth()  && player.getX() + 21 < platforms[i].getX() + platforms[i].getWidth() + 15)|| (player.getX() + player.getWidth() - 21 < platforms[i].getX() && player.getX() + player.getWidth() - 21 > platforms[i].getX() - 15))
+                && player.getY() + player.getHeight() > platforms[i].getY()  + platforms[i].getHeight()/2
+                
+                && player.getY() < platforms[i].getY() + platforms[i].getHeight())
+            {
+               
+                player.setVelocity((double) - player.getVelocity().x * 0.8, player.getVelocity().y);
+                std::cout << "bounce" << std::endl;
             }
            
            

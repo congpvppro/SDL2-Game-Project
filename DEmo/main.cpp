@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
     SDL_Texture* charactertex = graphics.loadTexture("resources/player.png");
     SDL_Texture* playerSprite = graphics.loadTexture("resources/egg1.png");
     SDL_Texture* lavaSprite = graphics.loadTexture("resources/lava.png");
-    SDL_Texture* platformSprite = graphics.loadTexture("resources/platform.png");
+    SDL_Texture* platformSprite = graphics.loadTexture("resources/platform1.png");
     SDL_Texture* coinSprite = graphics.loadTexture("resources/coin.png");
     SDL_Texture* scoreBoxSprite = graphics.loadTexture("resources/scorebox.png");
     SDL_Texture* logo = graphics.loadTexture("resources/title.png");
@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
         }
 
         while (SDL_PollEvent(&e) ) {
-            if (!graphics.freefall) {
+            
                 if (e.type == SDL_KEYDOWN)
                 {
                     switch (e.key.keysym.sym) {
@@ -165,7 +165,7 @@ int main(int argc, char** argv) {
                     } break;
                     }
                 }
-            }
+            
             if (graphics.gameOver) {
                 switch (e.type) {
 
