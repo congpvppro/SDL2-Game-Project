@@ -199,9 +199,10 @@ struct Game {
     {
         SDL_SetRenderDrawColor(graphics.renderer, 240, 235, 227, 0);
         SDL_RenderClear(graphics.renderer);
-        graphics.Draw_Font("Press A and D to move, drag and release left mouse button to jump.", SCREEN_WIDTH / 2 - 443, SCREEN_HEIGHT / 2 -32, 886, 32, 50, { 178, 150, 125 }, "resources/font.otf");
-        graphics.Draw_Font("You can bounce when you hit the wall", SCREEN_WIDTH / 2 - 221, SCREEN_HEIGHT / 2  , 443, 32, 50, { 178, 150, 125 }, "resources/font.otf");
-        graphics.Draw_Font("1 coin = 1 point", SCREEN_WIDTH / 2 - 80, SCREEN_HEIGHT / 2 + 32, 160, 32, 50, { 178, 150, 125 }, "resources/font.otf");
+        graphics.Draw_Font("Press A, D or <-, -> to move, drag and release left mouse button to jump.", SCREEN_WIDTH / 2 - 450, SCREEN_HEIGHT / 2 - 64, 900, 32, 50, { 178, 150, 125 }, "resources/font.otf");
+        graphics.Draw_Font("You can bounce when you hit the wall", SCREEN_WIDTH / 2 - 221, SCREEN_HEIGHT / 2 -32  , 443, 32, 50, { 178, 150, 125 }, "resources/font.otf");
+        graphics.Draw_Font("Press ESC to pause", SCREEN_WIDTH / 2 - 110, SCREEN_HEIGHT / 2 , 221, 32, 50, { 178, 150, 125 }, "resources/font.otf");
+        graphics.Draw_Font("1 coin = 1 point", SCREEN_WIDTH / 2 - 86, SCREEN_HEIGHT / 2 + 32, 173, 32, 50, { 178, 150, 125 }, "resources/font.otf");
 
          if (mouse_x >= 32 && mouse_x <= 82 && mouse_y >= 32 && mouse_y <= 82)
         {

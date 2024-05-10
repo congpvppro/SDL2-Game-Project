@@ -2,8 +2,8 @@
 #include <iostream>
 #include <cmath>
 
-int screenHeight = 1000;
-int screenWidth = 1900;
+int screenHeight = 1040;
+int screenWidth = 1920;
 Platform::Platform(int index) {
     width = 100;
     height = 32;

@@ -113,7 +113,15 @@ int main(int argc, char** argv) {
                 if (e.type == SDL_KEYDOWN)
                 {
                     switch (e.key.keysym.sym) {
-                    
+                    case SDLK_LEFT:
+                        player.setVelocity(-3, 0);
+                        a_pressed = true;
+                        flip = SDL_FLIP_HORIZONTAL;
+                        break;
+                    case SDLK_RIGHT:
+                        player.setVelocity(3, 0);
+                        d_pressed = true;
+                        break;
                     case SDLK_a:
                         player.setVelocity(-3, 0);
                         a_pressed = true;
@@ -143,6 +151,15 @@ int main(int argc, char** argv) {
                         flip = SDL_FLIP_NONE;
                         break;
                     case SDLK_d:
+                        player.setVelocity(0, 0);
+                        d_pressed = false;
+                        break;
+                    case SDLK_LEFT:
+                        player.setVelocity(0, 0);
+                        a_pressed = false;
+                        flip = SDL_FLIP_NONE;
+                        break;
+                    case SDLK_RIGHT:
                         player.setVelocity(0, 0);
                         d_pressed = false;
                         break;

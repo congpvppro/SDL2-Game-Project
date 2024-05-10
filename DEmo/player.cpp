@@ -4,8 +4,8 @@
 
 const double pi = 3.1415926535897;
 const int gravity = 1;
-const int screenWidth = 1900;
-const int screenHeight = 1000;
+const int screenWidth = 1920;
+const int screenHeight = 1040;
 
 Player::Player(double x, double y, int width, int height) {
     this->x = x;
