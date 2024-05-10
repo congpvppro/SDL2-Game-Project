@@ -15,6 +15,6 @@
         void scroll(int distance) {
             scrollingOffset -= distance;
         
-            if (scrollingOffset < 0) { scrollingOffset = 1400; }
+            if (scrollingOffset < 0) { scrollingOffset = SCREEN_WIDTH; }
         }
     };

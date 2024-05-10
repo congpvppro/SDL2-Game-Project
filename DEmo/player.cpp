@@ -4,8 +4,8 @@
 
 const double pi = 3.1415926535897;
 const int gravity = 1;
-const int screenWidth = 1400;
-const int screenHeight = 800;
+const int screenWidth = 1900;
+const int screenHeight = 1000;
 
 Player::Player(double x, double y, int width, int height) {
     this->x = x;
@@ -77,6 +77,6 @@ void Player::updatePosition() {
     if (x < 0)
         velocity.x *= -1;
 
-    if (x + width > 1400)
+    if (x + width > screenWidth)
         velocity.x *= -1;
 }

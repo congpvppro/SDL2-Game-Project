@@ -2,8 +2,8 @@
 #ifndef _DEFS__H
 #define _DEFS__H
 
-const int SCREEN_WIDTH = 1400;
-const int SCREEN_HEIGHT = 800;
+const int SCREEN_WIDTH = 1900;
+const int SCREEN_HEIGHT = 1000;
 
 const char* PLAYER_FILE = "resource//player.png";
 const int IDLE_CLIPS[][4] = {

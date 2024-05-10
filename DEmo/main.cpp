@@ -31,7 +31,7 @@ bool mouse_down = false;
 bool a_pressed = false, d_pressed = false;
 
 
-bool pause = false, playedsound = false;
+bool playedsound = false;
 
 SDL_RendererFlip flip = SDL_FLIP_NONE;
 
@@ -87,11 +87,14 @@ int main(int argc, char** argv) {
     SDL_Texture* musicon = graphics.loadTexture("resources/musicon.png");
     SDL_Texture* musicoff = graphics.loadTexture("resources/musicoff.png");
     SDL_Texture* menu = graphics.loadTexture("resources/menu.png");
+    SDL_Texture* playbutton = graphics.loadTexture("resources/play.png");
     Mix_Chunk* fxLaunch = Mix_LoadWAV("resources/launch.wav");
     Mix_Chunk* fxClick = Mix_LoadWAV("resources/click.wav");
     Mix_Chunk* fxDeath = Mix_LoadWAV("resources/die.wav");
     Mix_Chunk* fxCoin = Mix_LoadWAV("resources/coin.wav");
     
+    
+
     idle.init(charactertex, IDLE_FRAMES, IDLE_CLIPS);
     running.init(charactertex, RUNNING_FRAMES, RUNNING_CLIPS);
     fall.init(charactertex, FALL_FRAMES, FALL_CLIPS);
@@ -104,18 +107,13 @@ int main(int argc, char** argv) {
         bool mouse_released = false;
         bool mouse_pressed = false;
 
-        if (timer1 % 5 == 0 ) {
-            idle.tick();
-            running.tick();
-            fall.tick();
-            ready.tick();
-        }
-
+        
         while (SDL_PollEvent(&e) ) {
-            
+            if (!graphics.freefall) {
                 if (e.type == SDL_KEYDOWN)
                 {
                     switch (e.key.keysym.sym) {
+                    
                     case SDLK_a:
                         player.setVelocity(-3, 0);
                         a_pressed = true;
@@ -128,7 +126,7 @@ int main(int argc, char** argv) {
                         startScreen = false;
                         break;
                     case SDLK_ESCAPE:
-                        pause = true;
+                        game.pause = true;
                         break;
                     default:
                         startScreen = false;
@@ -165,7 +163,7 @@ int main(int argc, char** argv) {
                     } break;
                     }
                 }
-            
+            }
             if (graphics.gameOver) {
                 switch (e.type) {
 
@@ -199,13 +197,13 @@ int main(int argc, char** argv) {
                 game.renderStartScreen(graphics, mouse_pressed, logo, titleScreen);
             }
             else {
-                game.renderPreStart(graphics, splashEggSprite, splashTimer,timer1, playedSplash, running);
+                game.renderPreStart(graphics, splashEggSprite, splashTimer,timer1, playedSplash, running, idle, ready, fall);
             }
         }
         else {
             if (!play && !instruction && !bestscore) {
 
-                game.renderMenu(graphics, play, instruction, bestscore, mouse_x, mouse_y, mouse_pressed,musicon,musicoff,soundon, soundoff,M,E,N,U,chamthan, item2, item3, item4, item5, lightning, crown, award);
+                game.renderMenu(graphics,mouse_down, play, instruction, bestscore, mouse_x, mouse_y, mouse_pressed,musicon,musicoff,soundon, soundoff,M,E,N,U,chamthan, item2, item3, item4, item5, lightning, crown, award);
             }
             else if (instruction)
             {
@@ -216,14 +214,18 @@ int main(int argc, char** argv) {
             {
                 game.renderBestScore(graphics, mouse_pressed, bestscore, mouse_x, mouse_y, return_tex);
             }
-            else if (play)
+            else if (play && !game.pause)
             {
                 graphics.update(graphics, return_tex, menu,timer1, mouse_pressed, mouse_released, mouse_down, mouse_x, mouse_y,fxLaunch, fxClick, fxDeath, fxCoin);
-                
-                    game.renderGame(graphics, background, sky, flip,play,mouse_pressed, a_pressed, mouse_down, d_pressed, mouse_x, mouse_y, idle, running, fall, ready, lavaSprite, scoreBoxSprite, platformSprite, coinSprite, return_tex, menu);
+                    game.renderGame(graphics, background, sky, flip,timer1,play,mouse_pressed, a_pressed, mouse_down, d_pressed, mouse_x, mouse_y, idle, running, fall, ready, lavaSprite, scoreBoxSprite, platformSprite, coinSprite, return_tex, menu);
                
                 
             }
+            else if (play && game.pause)
+            {
+                game.renderPause(graphics, background, sky, flip, timer1, play, mouse_pressed, a_pressed, mouse_down, d_pressed, mouse_x, mouse_y, idle, running, fall, ready, lavaSprite, scoreBoxSprite, platformSprite, coinSprite, return_tex, menu, playbutton);
+            }
+            
 
 
         }

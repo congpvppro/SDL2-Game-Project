@@ -2,13 +2,14 @@
 #include <iostream>
 #include <cmath>
 
-int screenHeight = 800;
+int screenHeight = 1000;
+int screenWidth = 1900;
 Platform::Platform(int index) {
     width = 100;
     height = 32;
     speed = 1;
     cnt = 0;
-    x = rand() % 1300 + 20;
+    x = rand() % (screenHeight - 100)  + 100;
     y = 0 - height - (index * 170);
 
     int coinInt = rand() % 4;
@@ -66,10 +67,9 @@ void Platform::updatePosition(int &speed) {
 
     if (y > screenHeight) {
         
-        x = rand() % 1300 + 20;
+        x = rand() % (screenWidth - 100) + 100;
         y = 0 - height - 900;
         cnt++;
-        std::cout << cnt << std::endl;
         if (cnt > speed) speed ++;
         int coinInt = rand() % 4;
 

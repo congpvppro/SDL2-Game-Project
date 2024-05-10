@@ -8,7 +8,8 @@
 #include <map>
 #include "SDL_mixer.h"
 struct Game {
-    bool playedSelect = true;;
+    bool playedSelect = true;
+    bool pause = false;
     bool playedsound = false;
     bool bsoundoff = false;
     bool bmusicoff = false;
@@ -40,9 +41,18 @@ struct Game {
     SDL_Rect pmusicoff_rect = { SCREEN_WIDTH - 72, SCREEN_HEIGHT - 77, 40, 40 };
     SDL_Rect psoundon_rect = { SCREEN_WIDTH - 72, SCREEN_HEIGHT - 137, 40, 40 };
     SDL_Rect psoundoff_rect = { SCREEN_WIDTH - 72, SCREEN_HEIGHT - 137, 40, 40 };
+    SDL_Rect play_rect = { SCREEN_WIDTH / 2 - 50, SCREEN_HEIGHT / 2 - 50, 100 , 100 };
+    SDL_Rect rplay_rect = { SCREEN_WIDTH / 2 - 30, SCREEN_HEIGHT / 2 - 30, 60, 60 };
     Mix_Music* music = Mix_LoadMUS("resources/arcade.ogg");
     
-
+    void UpdateAnim(Animation& running, Animation& idle, Animation& ready, Animation& fall, int& timer1) {
+        if (timer1 % 5 == 0) {
+            idle.tick();
+            running.tick();
+            fall.tick();
+            ready.tick();
+        }
+    }
 
     void renderTexture(Graphics& graphics, SDL_Texture* texture, int x, int y, int w, int h)
     {
@@ -53,7 +63,7 @@ struct Game {
     void renderBackground(ScrollingBackground& background, Graphics& graphics, int y, int w, int h)
     {
         renderTexture(graphics, background.texture, background.scrollingOffset, y, w, h);
-        renderTexture(graphics, background.texture, background.scrollingOffset - 1400, y, w, h);
+        renderTexture(graphics, background.texture, background.scrollingOffset - SCREEN_WIDTH, y, w, h);
     }
 
     void renderStartScreen(Graphics& graphics, bool& mouse_pressed, SDL_Texture* logo, bool& titleScreen) {
@@ -80,8 +90,9 @@ struct Game {
         }
     }
 
-    void renderPreStart(Graphics& graphics, SDL_Texture* splashEggSprite, double& splashTimer,int & timer1, bool& playedSplash, Animation& running)
+    void renderPreStart(Graphics& graphics, SDL_Texture* splashEggSprite, double& splashTimer,int & timer1, bool& playedSplash, Animation& running, Animation& idle, Animation& ready, Animation& fall)
     {
+        UpdateAnim(running, idle, ready, fall, timer1);
         if (!playedSplash) {
             Mix_PlayChannel(-1, fxSplash, 0);
             playedSplash = true;
@@ -103,7 +114,7 @@ struct Game {
         timer1 += 1;
     }
 
-    void renderMenu(Graphics& graphics ,bool& play, bool& instruction, bool& bestscore, int& mouse_x, int& mouse_y, bool& mouse_pressed, SDL_Texture* musicon, SDL_Texture* musicoff, SDL_Texture* soundon, SDL_Texture* soundoff,SDL_Texture* M, SDL_Texture* E, SDL_Texture* N, SDL_Texture* U, SDL_Texture* chamthan, SDL_Texture* item2, SDL_Texture* item3, SDL_Texture* item4, SDL_Texture* item5, SDL_Texture* lightning, SDL_Texture* crown, SDL_Texture* award)
+    void renderMenu(Graphics& graphics ,bool& mouse_down, bool& play, bool& instruction, bool& bestscore, int& mouse_x, int& mouse_y, bool& mouse_pressed, SDL_Texture* musicon, SDL_Texture* musicoff, SDL_Texture* soundon, SDL_Texture* soundoff,SDL_Texture* M, SDL_Texture* E, SDL_Texture* N, SDL_Texture* U, SDL_Texture* chamthan, SDL_Texture* item2, SDL_Texture* item3, SDL_Texture* item4, SDL_Texture* item5, SDL_Texture* lightning, SDL_Texture* crown, SDL_Texture* award)
     {
         graphics.play(music, bmusicoff);
         SDL_SetRenderDrawColor(graphics.renderer, 240, 235, 227, 0);
@@ -188,7 +199,10 @@ struct Game {
     {
         SDL_SetRenderDrawColor(graphics.renderer, 240, 235, 227, 0);
         SDL_RenderClear(graphics.renderer);
-        graphics.Draw_Font("Use A and D or <- and -> to move, hold and release left mouse button to jump.", SCREEN_WIDTH / 2 - 443, SCREEN_HEIGHT / 2, 886, 32, 32, { 178, 150, 125 }, "resources/font.otf");
+        graphics.Draw_Font("Press A and D to move, drag and release left mouse button to jump.", SCREEN_WIDTH / 2 - 443, SCREEN_HEIGHT / 2 -32, 886, 32, 50, { 178, 150, 125 }, "resources/font.otf");
+        graphics.Draw_Font("You can bounce when you hit the wall", SCREEN_WIDTH / 2 - 221, SCREEN_HEIGHT / 2  , 443, 32, 50, { 178, 150, 125 }, "resources/font.otf");
+        graphics.Draw_Font("1 coin = 1 point", SCREEN_WIDTH / 2 - 80, SCREEN_HEIGHT / 2 + 32, 160, 32, 50, { 178, 150, 125 }, "resources/font.otf");
+
          if (mouse_x >= 32 && mouse_x <= 82 && mouse_y >= 32 && mouse_y <= 82)
         {
             SDL_RenderCopy(graphics.renderer, return_tex, NULL, &preturn_rect);
@@ -223,9 +237,10 @@ struct Game {
 
     }
 
-    void renderGame(Graphics& graphics, ScrollingBackground& background, ScrollingBackground& sky, SDL_RendererFlip& flip, bool& play,bool& mouse_pressed, bool& a_pressed, bool& mouse_down, bool& d_pressed, int& mouse_x, int& mouse_y, Animation& idle, Animation& running, Animation& fall, Animation& ready, SDL_Texture* lavaSprite, SDL_Texture* scoreBoxSprite, SDL_Texture* platformSprite, SDL_Texture* coinSprite, SDL_Texture* return_tex, SDL_Texture*menu)
+    void renderGame(Graphics& graphics, ScrollingBackground& background, ScrollingBackground& sky, SDL_RendererFlip& flip, int& timer1,bool& play,bool& mouse_pressed, bool& a_pressed, bool& mouse_down, bool& d_pressed, int& mouse_x, int& mouse_y, Animation& idle, Animation& running, Animation& fall, Animation& ready, SDL_Texture* lavaSprite, SDL_Texture* scoreBoxSprite, SDL_Texture* platformSprite, SDL_Texture* coinSprite, SDL_Texture* return_tex, SDL_Texture*menu)
     {
         graphics.play(music, bmusicoff);
+        UpdateAnim(running, idle, ready, fall, timer1);
 
         
         background.scroll(3);
@@ -233,8 +248,8 @@ struct Game {
        
         SDL_SetRenderDrawColor(graphics.renderer, 238, 228, 225, 255);
         SDL_RenderClear(graphics.renderer);
-        renderBackground(sky, graphics, 0, 1400, 800);
-        renderBackground(background, graphics, 400, 1400, 400);
+        renderBackground(sky, graphics, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        renderBackground(background, graphics, SCREEN_HEIGHT/2, SCREEN_WIDTH, SCREEN_HEIGHT/2);
 
         if (mouse_down && player.isOnGround()) {
             SDL_SetRenderDrawColor(graphics.renderer, 178, 150, 125, 255);
@@ -268,7 +283,6 @@ struct Game {
             const SDL_Rect* clip = running.getCurrentClip();
             SDL_Rect renderQuad = { (int)player.getX() ,(int)player.getY() , clip->w * 2, clip->h * 2 };
             SDL_RenderCopyEx(graphics.renderer, running.texture, clip, &renderQuad, NULL, NULL, flip);
-            std::cout << player.getY() + player.getHeight() << " " << platforms[0].getY() << " " << platforms[0].getX() + platforms[0].getWidth() << " " << clip->w << " " << clip->h << std::endl;
         }
         else if (player.getVelocity().y != 0)
         {
@@ -291,7 +305,7 @@ struct Game {
             }
 
         }
-        SDL_Rect lavaSprite_rect = { 0, (int)graphics.lavaY, 1400, 60 };
+        SDL_Rect lavaSprite_rect = { 0, (int)graphics.lavaY, SCREEN_WIDTH, 60 };
         SDL_RenderCopy(graphics.renderer, lavaSprite, NULL, &lavaSprite_rect);
 
         SDL_Rect scoreBoxSprite_rect = { 17, 17, 102, 70 };
@@ -338,6 +352,90 @@ struct Game {
         }
 
         graphics.presentScene();
+    }
+
+    void renderPause(Graphics& graphics, ScrollingBackground& background, ScrollingBackground& sky, SDL_RendererFlip& flip, int& timer1,bool& play, bool& mouse_pressed, bool& a_pressed, bool& mouse_down, bool& d_pressed, int& mouse_x, int& mouse_y, Animation& idle, Animation& running, Animation& fall, Animation& ready, SDL_Texture* lavaSprite, SDL_Texture* scoreBoxSprite, SDL_Texture* platformSprite, SDL_Texture* coinSprite, SDL_Texture* return_tex, SDL_Texture* menu, SDL_Texture* playbutton) {
+        SDL_RenderClear(graphics.renderer);
+        SDL_SetRenderDrawColor(graphics.renderer, 238, 228, 225, 255);
+        SDL_RenderClear(graphics.renderer);
+        renderBackground(sky, graphics, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        renderBackground(background, graphics, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT / 2);
+        if (mouse_down && player.isOnGround()) {
+            SDL_SetRenderDrawColor(graphics.renderer, 178, 150, 125, 255);
+            SDL_RenderDrawLine(
+                graphics.renderer,
+                graphics.mouseDownX + (int)(player.getX() - graphics.mouseDownX) + (int)(player.getWidth() / 2),
+                graphics.mouseDownY + (int)(player.getY() - graphics.mouseDownY) + (int)(player.getHeight() / 2),
+                mouse_x + (int)(player.getX() - graphics.mouseDownX) + (int)(player.getWidth() / 2),
+                mouse_y + (int)(player.getY() - graphics.mouseDownY) + (int)(player.getHeight() / 2)
+            );
+        }
+
+        for (int i = 0; i < 10; i++) {
+            SDL_Rect platformSprite_rect = { (int)platforms[i].getX(),(int)platforms[i].getY(), 100, 32 };
+            SDL_RenderCopy(graphics.renderer, platformSprite, NULL, &platformSprite_rect);
+
+            if (platforms[i].getHasCoin()) {
+                SDL_Rect coinSprite_rect = { platforms[i].getCoinX(), platforms[i].getCoinY(), 24, 24 };
+                SDL_RenderCopy(graphics.renderer, coinSprite, NULL, &coinSprite_rect);
+            }
+        }
+        double distance = (double)mouse_x - player.getX();
+        if (!a_pressed && !d_pressed && player.getVelocity().y == 0 && !mouse_down)
+        {
+            const SDL_Rect* clip = idle.getCurrentClip();
+            SDL_Rect renderQuad = { (int)player.getX() ,(int)player.getY() , clip->w * 2 , clip->h * 2 };
+            SDL_RenderCopy(graphics.renderer, idle.texture, clip, &renderQuad);
+        }
+        else if ((a_pressed || d_pressed) && player.getVelocity().y == 0)
+        {
+            const SDL_Rect* clip = running.getCurrentClip();
+            SDL_Rect renderQuad = { (int)player.getX() ,(int)player.getY() , clip->w * 2, clip->h * 2 };
+            SDL_RenderCopyEx(graphics.renderer, running.texture, clip, &renderQuad, NULL, NULL, flip);
+        }
+        else if (player.getVelocity().y != 0)
+        {
+            const SDL_Rect* clip = fall.getCurrentClip();
+            SDL_Rect renderQuad = { (int)player.getX() ,(int)player.getY() , clip->w * 2 , clip->h * 2 };
+            SDL_RenderCopy(graphics.renderer, fall.texture, clip, &renderQuad);
+        }
+        else if (mouse_down)
+        {
+            if (distance < 0) {
+                const SDL_Rect* clip = ready.getCurrentClip();
+                SDL_Rect renderQuad = { (int)player.getX() ,(int)player.getY() , clip->w * 2, clip->h * 2 };
+                SDL_RenderCopyEx(graphics.renderer, ready.texture, clip, &renderQuad, NULL, NULL, SDL_FLIP_HORIZONTAL);
+            }
+            else
+            {
+                const SDL_Rect* clip = ready.getCurrentClip();
+                SDL_Rect renderQuad = { (int)player.getX() ,(int)player.getY() , clip->w * 2, clip->h * 2 };
+                SDL_RenderCopy(graphics.renderer, ready.texture, clip, &renderQuad);
+            }
+
+        }
+        SDL_Rect lavaSprite_rect = { 0, (int)graphics.lavaY, SCREEN_WIDTH, 60 };
+        SDL_RenderCopy(graphics.renderer, lavaSprite, NULL, &lavaSprite_rect);
+
+        SDL_Rect scoreBoxSprite_rect = { 17, 17, 102, 70 };
+        SDL_RenderCopy(graphics.renderer, scoreBoxSprite, NULL, &scoreBoxSprite_rect);
+
+        graphics.Draw_Font(graphics.score.score, 28, 20, 75, 64, 100, { 0, 0, 0 }, "resources/font.otf");
+        graphics.Draw_Font(graphics.score.highscore, 28, 90, 74, 32, 100, { 0, 0, 0 }, "resources/font.otf");
+        if (mouse_x >= SCREEN_WIDTH / 2 - 50 && mouse_x <= SCREEN_WIDTH / 2 + 50 && mouse_y >= SCREEN_HEIGHT / 2 - 50 && mouse_y <= SCREEN_HEIGHT / 2 + 50)
+        {
+            SDL_RenderCopy(graphics.renderer, playbutton, NULL, &rplay_rect);
+
+            if (mouse_pressed)
+            {
+                graphics.mouseDownX = mouse_x;
+                graphics.mouseDownY = mouse_y;
+                pause = false;
+              
+            }
+        }
+        else SDL_RenderCopy(graphics.renderer, playbutton, NULL, &play_rect);
+        SDL_RenderPresent(graphics.renderer);
     }
 
     void manageAudioandMusic(Graphics &graphics, SDL_Texture* musicon, SDL_Texture* musicoff, SDL_Texture* soundon, SDL_Texture* soundoff, bool &mouse_pressed, int& mouse_x, int& mouse_y)
