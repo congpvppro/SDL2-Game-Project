@@ -12,7 +12,7 @@ Dự án Game Lập trình nâng cao được xây dựng bằng SDL2 và C++.
 - 8.5/10.
 
 ## Tính năng của game
-- Có chứa các animation của nhân vật như đứng, chạy, nhảy và rơi.
+- Có chứa các `animation` của nhân vật như đứng, chạy, nhảy và rơi.
 - Có `nhạc nền` và `background` chuyển động. 
 - Có các tính năng thường thấy như `MENU`, `pause`, `restart` và có thể tắt các `nhạc nền` hoặc `sound effects` trong gamee nếu cần thiết.
 - Có thuật toán để xác định quỹ đạo bay của nhân vật và bật lại khi va chạm với các vật thể.
