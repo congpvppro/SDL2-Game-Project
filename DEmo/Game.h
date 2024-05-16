@@ -21,14 +21,14 @@ struct Game {
     SDL_Rect preturn_rect = { 37 , 37, 40 , 40 };
     SDL_Rect item2_rect = { SCREEN_WIDTH / 2 - 400, SCREEN_HEIGHT / 2 - 300, 800 , 200 };
     SDL_Rect item4_rect = { SCREEN_WIDTH / 2 - 380, SCREEN_HEIGHT / 2 - 350, 760 , 300 };
-    SDL_Rect item3_rect = { SCREEN_WIDTH / 2 - 200, SCREEN_HEIGHT / 2 - 50, 400 , 400 };
-    SDL_Rect item5_rect1 = { SCREEN_WIDTH / 2 - 150, SCREEN_HEIGHT / 2, 300 , 80 };
-    SDL_Rect item5_rect2 = { SCREEN_WIDTH / 2 - 150, SCREEN_HEIGHT / 2 + 115, 300 , 80 };
-    SDL_Rect item5_rect3 = { SCREEN_WIDTH / 2 - 150, SCREEN_HEIGHT / 2 + 230, 300 , 80 };
-    SDL_Rect lightning_rect = { SCREEN_WIDTH / 2 - 165, SCREEN_HEIGHT / 2 - 10, 70 , 100 };
-    SDL_Rect award_rect = { SCREEN_WIDTH / 2 - 165, SCREEN_HEIGHT / 2 + 220, 70 , 100 };
+    SDL_Rect item3_rect = { SCREEN_WIDTH / 2 - 230, SCREEN_HEIGHT / 2 , 460 , 400 };
+    SDL_Rect item5_rect1 = { SCREEN_WIDTH / 2 - 150, SCREEN_HEIGHT / 2 + 50, 300 , 80 };
+    SDL_Rect item5_rect2 = { SCREEN_WIDTH / 2 - 150, SCREEN_HEIGHT / 2 + 115 + 50, 300 , 80 };
+    SDL_Rect item5_rect3 = { SCREEN_WIDTH / 2 - 150, SCREEN_HEIGHT / 2 + 230 + 50, 300 , 80 };
+    SDL_Rect lightning_rect = { SCREEN_WIDTH / 2 - 165, SCREEN_HEIGHT / 2 - 10 + 50, 70 , 100 };
+    SDL_Rect award_rect = { SCREEN_WIDTH / 2 - 165, SCREEN_HEIGHT / 2 + 220 + 50, 70 , 100 };
     SDL_Rect crown_rect = { SCREEN_WIDTH / 2 - 55, SCREEN_HEIGHT / 2 - 220, 110 , 80 };
-    SDL_Rect chamthan_rect = { SCREEN_WIDTH / 2 - 165, SCREEN_HEIGHT / 2 + 105, 50 , 100 };
+    SDL_Rect chamthan_rect = { SCREEN_WIDTH / 2 - 165, SCREEN_HEIGHT / 2 + 105 + 50, 50 , 100 };
     SDL_Rect M_rect = { SCREEN_WIDTH / 2 - 240, SCREEN_HEIGHT / 2 - 280, 80 , 92 };
     SDL_Rect E_rect = { SCREEN_WIDTH / 2 - 161, SCREEN_HEIGHT / 2 - 294, 80 , 92 };
     SDL_Rect N_rect = { SCREEN_WIDTH / 2 + 82, SCREEN_HEIGHT / 2 - 294, 80 , 92 };
@@ -119,8 +119,8 @@ struct Game {
         graphics.play(music, bmusicoff);
         SDL_SetRenderDrawColor(graphics.renderer, 240, 235, 227, 0);
         SDL_RenderClear(graphics.renderer);
-        SDL_RenderDrawCircle(graphics.renderer, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 100, 300);
-        SDL_RenderFillCircle(graphics.renderer, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 100, 300);
+        SDL_RenderDrawCircle(graphics.renderer, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 100, 400);
+        SDL_RenderFillCircle(graphics.renderer, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 100, 400);
         SDL_RenderCopy(graphics.renderer, item2, NULL, &item2_rect);
         SDL_RenderCopy(graphics.renderer, item4, NULL, &item4_rect);
         SDL_RenderCopy(graphics.renderer, item3, NULL, &item3_rect);
@@ -134,12 +134,12 @@ struct Game {
         SDL_RenderCopyEx(graphics.renderer, N, NULL, &N_rect, 10.0f, NULL, SDL_FLIP_NONE);
         SDL_RenderCopyEx(graphics.renderer, U, NULL, &U_rect, 10.0f, NULL, SDL_FLIP_NONE);
        
-        if (mouse_x >= SCREEN_WIDTH / 2 - 150 && mouse_x <= SCREEN_WIDTH / 2 + 150 && mouse_y >= SCREEN_HEIGHT / 2 && mouse_y <= SCREEN_HEIGHT / 2 + 80)
+        if (mouse_x >= SCREEN_WIDTH / 2 - 150 && mouse_x <= SCREEN_WIDTH / 2 + 150 && mouse_y >= SCREEN_HEIGHT / 2 + 50 && mouse_y <= SCREEN_HEIGHT / 2 + 80 + 50)
         {
 
-            graphics.Draw_Font("PLAY", SCREEN_WIDTH / 2 - 60, SCREEN_HEIGHT / 2 + 20, 130, 40, 100, { 170, 215, 217 }, "resources/Kaph.otf");
-            graphics.Draw_Font("INSTRUCTION", SCREEN_WIDTH / 2 - 70, SCREEN_HEIGHT / 2 + 130, 180, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
-            graphics.Draw_Font("HIGHSCORE", SCREEN_WIDTH / 2 - 65, SCREEN_HEIGHT / 2 + 245, 170, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
+            graphics.Draw_Font("PLAY", SCREEN_WIDTH / 2 - 60, SCREEN_HEIGHT / 2 + 20 + 50 , 130, 40, 100, { 170, 215, 217 }, "resources/Kaph.otf");
+            graphics.Draw_Font("INSTRUCTION", SCREEN_WIDTH / 2 - 70, SCREEN_HEIGHT / 2 + 130 + 50 , 180, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
+            graphics.Draw_Font("HIGHSCORE", SCREEN_WIDTH / 2 - 65, SCREEN_HEIGHT / 2 + 245 + 50 , 170, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
             if (!playedsound)
             {
                 Mix_PlayChannel(-1, fxchoose, 0);
@@ -150,31 +150,31 @@ struct Game {
                 play = true;
             }
         }
-        else if (mouse_x >= SCREEN_WIDTH / 2 - 150 && mouse_x <= SCREEN_WIDTH / 2 + 150 && mouse_y >= SCREEN_HEIGHT / 2 + 115 && mouse_y <= SCREEN_HEIGHT / 2 + 195)
+        else if (mouse_x >= SCREEN_WIDTH / 2 - 150 && mouse_x <= SCREEN_WIDTH / 2 + 150 && mouse_y >= SCREEN_HEIGHT / 2 + 115 + 50 && mouse_y <= SCREEN_HEIGHT / 2 + 195 + 50)
         {
             if (!playedsound)
             {
                 Mix_PlayChannel(-1, fxchoose, 0);
                 playedsound = true;
             }
-            graphics.Draw_Font("INSTRUCTION", SCREEN_WIDTH / 2 - 65, SCREEN_HEIGHT / 2 + 135, 150, 40, 100, { 170, 215, 217 }, "resources/Kaph.otf");
-            graphics.Draw_Font("PLAY", SCREEN_WIDTH / 2 - 65, SCREEN_HEIGHT / 2 + 15, 150, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
-            graphics.Draw_Font("HIGHSCORE", SCREEN_WIDTH / 2 - 65, SCREEN_HEIGHT / 2 + 245, 170, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
+            graphics.Draw_Font("INSTRUCTION", SCREEN_WIDTH / 2 - 65, SCREEN_HEIGHT / 2 + 135 + 50, 150, 40, 100, { 170, 215, 217 }, "resources/Kaph.otf");
+            graphics.Draw_Font("PLAY", SCREEN_WIDTH / 2 - 65, SCREEN_HEIGHT / 2 + 15 + 50, 150 , 50, 100, { 255,255,255 }, "resources/Kaph.otf");
+            graphics.Draw_Font("HIGHSCORE", SCREEN_WIDTH / 2 - 65, SCREEN_HEIGHT / 2 + 245 + 50, 170, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
             if (mouse_pressed)
             {
                 instruction = true;
             }
         }
-        else if (mouse_x >= SCREEN_WIDTH / 2 - 150 && mouse_x <= SCREEN_WIDTH / 2 + 150 && mouse_y >= SCREEN_HEIGHT / 2 + 230 && mouse_y <= SCREEN_HEIGHT / 2 + 310)
+        else if (mouse_x >= SCREEN_WIDTH / 2 - 150 && mouse_x <= SCREEN_WIDTH / 2 + 150 && mouse_y >= SCREEN_HEIGHT / 2 + 230 + 50 && mouse_y <= SCREEN_HEIGHT / 2 + 310 + 50)
         {
             if (!playedsound)
             {
                 Mix_PlayChannel(-1, fxchoose, 0);
                 playedsound = true;
             }
-            graphics.Draw_Font("HIGHSCORE", SCREEN_WIDTH / 2 - 60, SCREEN_HEIGHT / 2 + 250, 150, 40, 100, { 170, 215, 217 }, "resources/Kaph.otf");
-            graphics.Draw_Font("PLAY", SCREEN_WIDTH / 2 - 65, SCREEN_HEIGHT / 2 + 15, 150, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
-            graphics.Draw_Font("INSTRUCTION", SCREEN_WIDTH / 2 - 70, SCREEN_HEIGHT / 2 + 130, 180, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
+            graphics.Draw_Font("HIGHSCORE", SCREEN_WIDTH / 2 - 60, SCREEN_HEIGHT / 2 + 250 + 50, 150, 40, 100, { 170, 215, 217 }, "resources/Kaph.otf");
+            graphics.Draw_Font("PLAY", SCREEN_WIDTH / 2 - 65, SCREEN_HEIGHT / 2 + 15 + 50, 150, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
+            graphics.Draw_Font("INSTRUCTION", SCREEN_WIDTH / 2 - 70, SCREEN_HEIGHT / 2 + 130 + 50, 180, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
             if (mouse_pressed)
             {
                 bestscore = true;
@@ -182,9 +182,9 @@ struct Game {
         }
         else {
             playedsound = false;
-            graphics.Draw_Font("PLAY", SCREEN_WIDTH / 2 - 65, SCREEN_HEIGHT / 2 + 15, 150, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
-            graphics.Draw_Font("INSTRUCTION", SCREEN_WIDTH / 2 - 70, SCREEN_HEIGHT / 2 + 130, 180, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
-            graphics.Draw_Font("HIGHSCORE", SCREEN_WIDTH / 2 - 65, SCREEN_HEIGHT / 2 + 245, 170, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
+            graphics.Draw_Font("PLAY", SCREEN_WIDTH / 2 - 65, SCREEN_HEIGHT / 2 + 15 + 50, 150, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
+            graphics.Draw_Font("INSTRUCTION", SCREEN_WIDTH / 2 - 70, SCREEN_HEIGHT / 2 + 130 + 50, 180, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
+            graphics.Draw_Font("HIGHSCORE", SCREEN_WIDTH / 2 - 65, SCREEN_HEIGHT / 2 + 245 + 50, 170, 50, 100, { 255,255,255 }, "resources/Kaph.otf");
         }
 
         manageAudioandMusic(graphics,musicon, musicoff,soundon, soundoff,mouse_pressed,mouse_x, mouse_y);

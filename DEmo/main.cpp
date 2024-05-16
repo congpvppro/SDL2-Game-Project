@@ -109,7 +109,8 @@ int main(int argc, char** argv) {
 
         
         while (SDL_PollEvent(&e) ) {
-            if (!graphics.freefall) {
+            if (!graphics.freefall ) {
+                
                 if (e.type == SDL_KEYDOWN)
                 {
                     switch (e.key.keysym.sym) {
@@ -181,6 +182,7 @@ int main(int argc, char** argv) {
                     }
                 }
             }
+           
             if (graphics.gameOver) {
                 switch (e.type) {
 
